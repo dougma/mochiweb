@@ -31,7 +31,7 @@ EBIN_FILES = $(ERL_OBJECTS) $(APP_FILES:%.app.src=../ebin/%.app)
 MODULES = $(ERL_SOURCES:%.erl=%)
 
 ../ebin/%.app: %.app.src
-	../support/make_app.escript $< $@ "" "$(MODULES)"
+	../support/make_app.escript $< $@ "1.0" "$(MODULES)"
 
 
 $(EBIN_DIR)/%.$(EMULATOR): %.erl
