@@ -1,5 +1,5 @@
 -module(mochiweb_skel).
--export([skelcopy/2]).
+-export([skelcopy/2, shorten/1]).
 
 -include_lib("kernel/include/file.hrl").
 
@@ -14,9 +14,12 @@ skelcopy(DestDir, Name) ->
                    N + 1
            end,
     skelcopy(src(), DestDir, Name, LDst),
-    ok = file:make_symlink(
-        filename:join(filename:dirname(code:which(?MODULE)), ".."),
-        filename:join([DestDir, Name, "deps", "mochiweb-src"])).
+    Src = filename:join(filename:dirname(code:which(?MODULE)), ".."),
+    Dest = filename:join([DestDir, Name, "deps", "mochiweb-src"]),
+    case file:make_symlink(Src, Dest) of 
+        ok -> ok;
+    { error, enotsup } -> io:format("couldn't symlink ~s to ~s~n", [shorten(Src), shorten(Dest)])
+    end.
 
 %% Internal API
 
@@ -75,6 +78,15 @@ ensuredir(Dir) ->
         E ->
             E
     end.
+
+% remove ".." parent directory specifiers from Dir
+shorten(Dir) ->
+    S = lists:foldl(fun ("..", [_H|T]) -> T;
+                        (C, List) -> [C | List]
+                    end,
+                    [],
+                    filename:split(Dir)),
+    filename:join(lists:reverse(S)).
 
 %%
 %% Tests
